@@ -1,0 +1,163 @@
+services:
+  # ============================================
+  # CORE SERVICES (always running)
+  # ============================================
+
+  api:
+    build: ./core/api
+    container_name: localisa-api
+    restart: unless-stopped
+    ports:
+      - "5002:5002"
+    env_file: .env
+    environment:
+      - REDIS_HOST=redis
+      - RAG_URL=http://rag:5001
+      - EMBED_URL=http://embeddings:8101
+    depends_on:
+      - redis
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - localisa
+
+  redis:
+    image: redis:7-alpine
+    container_name: localisa-redis
+    restart: unless-stopped
+    volumes:
+      - ${DATA_DIR:-./data}/redis:/data
+    command: redis-server --appendonly yes
+    networks:
+      - localisa
+
+  web:
+    build: ./web
+    container_name: localisa-web
+    restart: unless-stopped
+    ports:
+      - "${WEB_PORT:-8080}:80"
+    depends_on:
+      - api
+    networks:
+      - localisa
+
+  # ============================================
+  # RAG (document search + embeddings)
+  # ============================================
+
+  rag:
+    build: ./core/rag
+    container_name: localisa-rag
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - EMBED_URL=http://embeddings:8101
+      - CHROMADB_DIR=/data/chromadb
+    volumes:
+      - ${DATA_DIR:-./data}/chromadb:/data/chromadb
+      - ${DATA_DIR:-./data}/documents:/data/documents
+    depends_on:
+      - embeddings
+    networks:
+      - localisa
+
+  embeddings:
+    build: ./core/rag
+    container_name: localisa-embeddings
+    restart: unless-stopped
+    env_file: .env
+    command: python embeddings.py
+    environment:
+      - EMBED_MODEL=${EMBED_MODEL:-BAAI/bge-m3}
+      - EMBED_DEVICE=${EMBED_DEVICE:-cpu}
+      - EMBED_PORT=8101
+    volumes:
+      - ${DATA_DIR:-./data}/models:/data/models
+    networks:
+      - localisa
+
+  # ============================================
+  # VOICE (profile: voice)
+  # ============================================
+
+  whisper:
+    build: ./core/voice
+    container_name: localisa-whisper
+    restart: unless-stopped
+    profiles: ["voice"]
+    env_file: .env
+    command: python whisper_server.py
+    environment:
+      - WHISPER_MODEL=${WHISPER_MODEL:-base}
+      - WHISPER_LANGUAGE=${WHISPER_LANGUAGE:-es}
+    volumes:
+      - ${DATA_DIR:-./data}/models:/data/models
+    networks:
+      - localisa
+
+  tts:
+    build: ./core/voice
+    container_name: localisa-tts
+    restart: unless-stopped
+    profiles: ["voice"]
+    env_file: .env
+    command: python tts_server.py
+    environment:
+      - TTS_MODEL=${TTS_MODEL:-es_MX-claude-high}
+    volumes:
+      - ${DATA_DIR:-./data}/voice:/data/voice
+    networks:
+      - localisa
+
+  # ============================================
+  # VISION (profile: vision)
+  # ============================================
+
+  vision:
+    build: ./core/vision
+    container_name: localisa-vision
+    restart: unless-stopped
+    profiles: ["vision"]
+    env_file: .env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - localisa
+
+  # ============================================
+  # TELEGRAM (profile: telegram)
+  # ============================================
+
+  telegram:
+    build: ./core/telegram
+    container_name: localisa-telegram
+    restart: unless-stopped
+    profiles: ["telegram"]
+    env_file: .env
+    environment:
+      - API_URL=http://api:5002
+    depends_on:
+      - api
+    networks:
+      - localisa
+
+  # ============================================
+  # HOME AUTOMATION (profile: home)
+  # ============================================
+
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: localisa-mqtt
+    restart: unless-stopped
+    profiles: ["home"]
+    ports:
+      - "1883:1883"
+    volumes:
+      - ${DATA_DIR:-./data}/mosquitto:/mosquitto/data
+    networks:
+      - localisa
+
+networks:
+  localisa:
+    driver: bridge
