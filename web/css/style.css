@@ -426,3 +426,103 @@ body {
     .message { margin-left: 0 !important; }
     .input-wrapper { gap: 6px; }
 }
+
+/* Settings panel */
+.set-section {
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+}
+
+.set-section h3 {
+    font-size: 0.95em;
+    color: var(--accent);
+    margin-bottom: 14px;
+    font-weight: 600;
+}
+
+.set-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.set-row label {
+    width: 130px;
+    font-size: 0.85em;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+.set-row input, .set-row select {
+    flex: 1;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 0.85em;
+    font-family: inherit;
+    outline: none;
+    max-width: 400px;
+}
+
+.set-row input:focus, .set-row select:focus {
+    border-color: var(--accent);
+}
+
+.set-group {
+    margin-left: 142px;
+    margin-bottom: 12px;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg-secondary);
+}
+
+.set-group .set-row label { width: 100px; }
+
+.set-actions { display: flex; align-items: center; gap: 12px; }
+
+.btn-test, .btn-save {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 0.85em;
+    transition: all 0.15s;
+}
+
+.btn-test:hover { border-color: var(--accent); }
+.btn-save { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 600; }
+.btn-save:hover { opacity: 0.85; }
+
+.set-result { font-size: 0.8em; }
+
+.set-toggle { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.set-toggle span { font-size: 0.85em; color: var(--text-secondary); }
+
+.set-check {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    font-size: 0.85em;
+    color: var(--text-secondary);
+}
+
+.set-check input { margin-top: 3px; }
+.set-check strong { color: var(--text-primary); }
+
+.set-plugins { max-width: 500px; }
+
+.set-save {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding-top: 16px;
+}

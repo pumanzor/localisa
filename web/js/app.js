@@ -7,6 +7,7 @@ const app = {
         this.applyI18n();
         voice.init();
         documents.init();
+        settings.init();
         this.setupInput();
         this.switchPanel('chat');
         this.fetchHealth();
@@ -76,6 +77,7 @@ const app = {
         // Update header
         const titles = {
             chat: i18n.t('chat'),
+            settings: i18n.t('settings'),
             documents: i18n.t('documents'),
             health: i18n.t('health'),
         };

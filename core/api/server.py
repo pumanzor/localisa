@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from config import settings
-from routes import chat, documents, health, models, voice, vision, devices
+from routes import chat, documents, health, models, voice, vision, devices, settings as settings_route
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 log = logging.getLogger("localisa")
@@ -46,6 +46,7 @@ app.include_router(models.router, prefix="/api")
 app.include_router(voice.router, prefix="/api")
 app.include_router(vision.router, prefix="/api")
 app.include_router(devices.router, prefix="/api")
+app.include_router(settings_route.router, prefix="/api")
 
 
 @app.get("/")
