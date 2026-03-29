@@ -1,0 +1,17 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install torch CPU-only (smaller) + sentence-transformers
+RUN pip install --no-cache-dir \
+    torch --index-url https://download.pytorch.org/whl/cpu && \
+    pip install --no-cache-dir \
+    sentence-transformers==3.0.0 \
+    fastapi==0.115.0 \
+    uvicorn[standard]==0.30.0
+
+COPY embeddings.py config.py ./
+
+EXPOSE 8101
+
+CMD ["python", "embeddings.py"]

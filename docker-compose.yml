@@ -7,8 +7,6 @@ services:
     build: ./core/api
     container_name: localisa-api
     restart: unless-stopped
-    ports:
-      - "5002:5002"
     env_file: .env
     environment:
       - REDIS_HOST=redis
@@ -16,6 +14,7 @@ services:
       - EMBED_URL=http://embeddings:8101
     depends_on:
       - redis
+      - rag
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks:
@@ -47,13 +46,14 @@ services:
   # ============================================
 
   rag:
-    build: ./core/rag
+    build:
+      context: ./core/rag
     container_name: localisa-rag
     restart: unless-stopped
     env_file: .env
     environment:
-      - EMBED_URL=http://embeddings:8101
-      - CHROMADB_DIR=/data/chromadb
+      - RAG_EMBED_URL=http://embeddings:8101
+      - RAG_CHROMADB_DIR=/data/chromadb
     volumes:
       - ${DATA_DIR:-./data}/chromadb:/data/chromadb
       - ${DATA_DIR:-./data}/documents:/data/documents
@@ -63,17 +63,17 @@ services:
       - localisa
 
   embeddings:
-    build: ./core/rag
+    build:
+      context: ./core/rag
+      dockerfile: Dockerfile.embeddings
     container_name: localisa-embeddings
     restart: unless-stopped
-    env_file: .env
-    command: python embeddings.py
     environment:
-      - EMBED_MODEL=${EMBED_MODEL:-BAAI/bge-m3}
+      - EMBED_MODEL=${EMBED_MODEL:-all-MiniLM-L6-v2}
       - EMBED_DEVICE=${EMBED_DEVICE:-cpu}
       - EMBED_PORT=8101
     volumes:
-      - ${DATA_DIR:-./data}/models:/data/models
+      - ${DATA_DIR:-./data}/models:/root/.cache
     networks:
       - localisa
 
@@ -86,13 +86,11 @@ services:
     container_name: localisa-whisper
     restart: unless-stopped
     profiles: ["voice"]
-    env_file: .env
-    command: python whisper_server.py
     environment:
       - WHISPER_MODEL=${WHISPER_MODEL:-base}
       - WHISPER_LANGUAGE=${WHISPER_LANGUAGE:-es}
     volumes:
-      - ${DATA_DIR:-./data}/models:/data/models
+      - ${DATA_DIR:-./data}/models:/root/.cache
     networks:
       - localisa
 
@@ -101,8 +99,6 @@ services:
     container_name: localisa-tts
     restart: unless-stopped
     profiles: ["voice"]
-    env_file: .env
-    command: python tts_server.py
     environment:
       - TTS_MODEL=${TTS_MODEL:-es_MX-claude-high}
     volumes:
@@ -134,9 +130,10 @@ services:
     container_name: localisa-telegram
     restart: unless-stopped
     profiles: ["telegram"]
-    env_file: .env
     environment:
       - API_URL=http://api:5002
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
+      - TELEGRAM_ALLOWED_USERS=${TELEGRAM_ALLOWED_USERS:-}
     depends_on:
       - api
     networks:
