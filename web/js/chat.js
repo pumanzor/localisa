@@ -38,14 +38,17 @@ const chat = {
                 if (done) break;
 
                 buffer += decoder.decode(value, { stream: true });
-                const lines = buffer.split("\n");
+                // Split by \r\n or \n, handle both
+                const lines = buffer.split(/\r?\n/);
                 buffer = lines.pop() || "";
 
                 for (const line of lines) {
-                    if (line.startsWith("event: ")) {
-                        eventType = line.slice(7).trim();
-                    } else if (line.startsWith("data: ") && eventType) {
-                        const data = line.slice(6);
+                    const trimmed = line.replace(/\r$/, "");
+
+                    if (trimmed.startsWith("event: ")) {
+                        eventType = trimmed.slice(7).trim();
+                    } else if (trimmed.startsWith("data: ") && eventType) {
+                        const data = trimmed.slice(6);
 
                         if (eventType === "token") {
                             fullText += data;
@@ -69,7 +72,7 @@ const chat = {
             contentEl.style.color = "var(--error)";
         }
 
-        // Final render with clean text
+        // Final render
         const finalText = this.cleanResponse(fullText);
         if (finalText) {
             contentEl.innerHTML = this.renderMarkdown(finalText);
@@ -93,9 +96,7 @@ const chat = {
     },
 
     cleanResponse(text) {
-        // Remove <think>...</think> blocks (DeepSeek R1, Qwen3 thinking)
         let clean = text.replace(/<think>[\s\S]*?<\/think>/g, "");
-        // Remove incomplete <think> block (still streaming)
         clean = clean.replace(/<think>[\s\S]*$/g, "");
         return clean.trim();
     },
@@ -128,17 +129,11 @@ const chat = {
     renderMarkdown(text) {
         if (!text) return "";
         return text
-            // Code blocks
             .replace(/```(\w*)\n([\s\S]*?)```/g, "<pre><code>$2</code></pre>")
-            // Inline code
             .replace(/`([^`]+)`/g, "<code>$1</code>")
-            // Bold
             .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
-            // Italic
             .replace(/\*([^*]+)\*/g, "<em>$1</em>")
-            // Double newline = paragraph break
             .replace(/\n\n+/g, "<br><br>")
-            // Single newline = line break
             .replace(/\n/g, "<br>");
     },
 
