@@ -27,12 +27,12 @@
                     <span data-i18n="documents">Documentos</span>
                 </div>
                 <div class="nav-item" data-panel="health" onclick="app.switchPanel('health')">
+                    <span>&#9889;</span>
+                    <span data-i18n="health">Estado</span>
+                </div>
                 <div class="nav-item" data-panel="settings" onclick="app.switchPanel('settings')">
                     <span>&#9881;</span>
                     <span data-i18n="settings">Ajustes</span>
-                </div>
-                    <span>&#9889;</span>
-                    <span data-i18n="health">Estado</span>
                 </div>
             </nav>
 
@@ -87,19 +87,19 @@
                 </div>
             </div>
 
-            <!-- Settings Panel -->
-            <div id="panel-settings" class="panel">
-                <div class="panel-content" id="settingsContent">
-                    <p style="color:var(--text-muted)">Loading...</p>
-                </div>
-            </div>
-
             <!-- Health Panel -->
             <div id="panel-health" class="panel">
                 <div class="panel-content">
                     <div id="healthGrid" class="health-grid">
                         <p style="color:var(--text-muted)">Cargando...</p>
                     </div>
+                </div>
+            </div>
+
+            <!-- Settings Panel -->
+            <div id="panel-settings" class="panel">
+                <div class="panel-content" id="settingsContent">
+                    <p style="color:var(--text-muted)">Loading...</p>
                 </div>
             </div>
         </main>
